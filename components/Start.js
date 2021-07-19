@@ -19,6 +19,13 @@ const Start = ({ navigation }) => {
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 50 : 'height';
   const background = require('../assets/img/background-img.png');
 
+  const handlePress = (text, color) => {
+    if (!text) {
+      return Alert.alert('Please enter a name');
+    }
+    navigation.navigate('Chat', { name, color });
+  };
+
   return (
     <ImageBackground
       style={styles.background}
@@ -99,7 +106,7 @@ const Start = ({ navigation }) => {
           >
             <Text
               style={styles.btnChat}
-              onPress={() => navigation.navigate('Chat', { name, color })}
+              onPress={() => handlePress(name, color)}
             >
               Start Chatting
             </Text>
@@ -118,11 +125,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    fontFamily: 'Poppins-Regular',
   },
   title: {
     fontSize: 45,
-    fontFamily: 'Poppins-Bold',
     fontWeight: '600',
     color: '#FFF',
     textAlign: 'center',
@@ -218,7 +223,6 @@ const styles = StyleSheet.create({
   },
   btnChat: {
     fontSize: 16,
-    fontFamily: 'Poppins-Bold',
     fontWeight: '600',
     color: '#fff',
     padding: 20,
