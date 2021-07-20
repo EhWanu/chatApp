@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { View, Platform, KeyboardAvoidingView, StyleSheet, LogBox } from 'react-native';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
 // Google Firebase
@@ -35,10 +35,9 @@ class Chat extends Component {
   }
 
   this.referenceChatMessages = firebase.firestore().collection('messages');
-  LogBox.ignoreLogs(['Setting a timer']);
+
 }
 
-  // Sets state with a static message
   // Sets state with a static message
   componentDidMount() {
     let { name } = this.props.route.params;
@@ -64,7 +63,7 @@ class Chat extends Component {
 
       // Creates reference to active user's messages
       this.referenceChatMessages = firebase.firestore().collection('messages');
-      // Lists for collection changes of currnet user
+      // Lists for collection changes of current user
       this.unsubscribeChatUser = this.referenceChatMessages
         .orderBy('createdAt', 'desc')
         .onSnapshot(this.onCollectionUpdate);
@@ -94,7 +93,7 @@ class Chat extends Component {
     this.setState({ messages });
   };
 
-  // Adds messages to firebase database
+  // Add messages to database
   addMessage() {
     const message = this.state.messages[0];
     this.referenceChatMessages.add({
@@ -117,7 +116,7 @@ class Chat extends Component {
     );
   }
 
-  // Here you can modify the color of the chat bubble from the sender
+  //modify the color of the chat bubble from the sender
   renderBubble(props) {
     return (
       <Bubble
