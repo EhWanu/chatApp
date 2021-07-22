@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { Alert, View, Platform, KeyboardAvoidingView, StyleSheet, LogBox } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import NetInfo from '@react-native-community/netinfo';
+import MapView from 'react-native-maps';
+import CustomActions from './CustomActions';
 
 // Google Firebase
 const firebase = require('firebase');
@@ -20,6 +22,8 @@ class Chat extends Component {
         avatar: '',
       },
       isConnected: false,
+      image: null,
+      location: null,
     };
   
 // Firebase
@@ -102,9 +106,15 @@ class Chat extends Component {
       let data = doc.data(); // Grabs QueryDocumentSnapshot's data
       messages.push({
         _id: data._id,
+        text: data.text,
         createdAt: data.createdAt.toDate(),
-        text: data.text || null,
-        user: data.user,
+        user: {
+          _id: data.user._id,
+          name: data.user.name,
+          avatar: data.user.avatar,
+        },
+        image: data.image || '',
+        location: data.location || null,
       });
     });
     this.setState({ messages });
@@ -171,8 +181,10 @@ class Chat extends Component {
       _id: message._id,
       uid: this.state.uid,
       createdAt: message.createdAt,
-      text: message.text || null,
+      text: message.text || '',
       user: message.user,
+      image: message.image || '',
+      location: message.location || null,
     });
   }
 
@@ -214,6 +226,37 @@ class Chat extends Component {
       />
     );
   }
+
+  // Returns a MapView that shows user's location
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          showsUserLocation={true}
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 15,
+            margin: 5,
+          }}
+          region={{
+            longitude: Number(currentMessage.location.longitude),
+            latitude: Number(currentMessage.location.latitude),
+            longitudeDelta: 0.0421,
+            latitudeDelta: 0.0922,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
+  renderActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+
+
   render() {
     const color = this.props.route.params.color; // Color user selected in Start.js
     const styles = StyleSheet.create({
@@ -229,7 +272,11 @@ class Chat extends Component {
     return (
       <View style={styles.container}>
         <GiftedChat
-          renderBubble={this.renderBubble}
+          renderBubble={this.renderBubble.bind(this)}
+          renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderUsernameOnMessage={true}
+          renderCustomView={this.renderCustomView}
+          renderActions={this.renderActions}
           messages={messages}
           onSend={(messages) => this.onSend(messages)}
           user={{
